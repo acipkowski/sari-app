@@ -1,6 +1,6 @@
 {
-  "name": "simple-table-example",
-  "version": "0.11.0",
+  "name": "sari-app",
+  "version": "1.0",
   "private": true,
   "homepage": "https://acipkowski.github.io/sari-app",
   "dependencies": {
@@ -27,7 +27,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "prebuild": "rm -rf dist",
+    "prebuild": "rimraf dist",
     "test": "vitest --exclude './src/__tests__/e2e/**'",
     "test:e2e": "concurrently --kill-others --success first \"npm start\" \"vitest './src/__tests__/e2e/integration.e2e.test.jsx'\"",
     "lint": "eslint 'src/**/*.{js,jsx}'",
@@ -35,7 +35,9 @@
     "format": "prettier --write src --config ./.prettierrc",
     "serve": "vite preview",
     "lhci:mobile": "lhci autorun",
-    "lhci:desktop": "lhci autorun --collect.settings.preset=desktop"
+    "lhci:desktop": "lhci autorun --collect.settings.preset=desktop",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "eslintConfig": {
     "extends": [
@@ -73,6 +75,7 @@
     "jsdom": "25.0.1",
     "msw": "^2.0.12",
     "prettier": "^3.1.0",
+    "rimraf": "^6.0.1",
     "vite": "^5.1.5",
     "vite-plugin-pwa": "0.21.0",
     "vitest": "2.1.2"
