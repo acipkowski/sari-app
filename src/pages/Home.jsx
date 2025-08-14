@@ -10,19 +10,18 @@ import {
   Select,
   Fieldset,
   Radio,
+  Link,
 } from "@trussworks/react-uswds";
 
-// Assume myData is your array of objects from data.json
+// Hardcoded data from NEFSC SARI website
 import myData from "./data.json";
 
 // --- Helper function to generate unique, sorted options for our dropdowns ---
 const getDropdownOptions = (data) => {
-  // Use Set to automatically get unique values
   const uniqueYears = [...new Set(data.map((item) => item.Year))];
   const uniqueSpecies = [...new Set(data.map((item) => item["Species Information"]))];
   const uniqueReviewProcesses = [...new Set(data.map((item) => item["Review Process"]))];
 
-  // Sort them for a better user experience
   uniqueYears.sort((a, b) => b - a); // Sort years descending
   uniqueSpecies.sort(); // Sort species alphabetically
   uniqueReviewProcesses.sort();
@@ -54,8 +53,6 @@ const HomePage = () => {
   // STATE 3: An object to hold all the current values from the form
   const [filters, setFilters] = useState(initialFilterState);
 
-  // By using useMemo, this expensive calculation only runs once when the component
-  // first loads, not on every re-render. This is a performance optimization.
   const formOptions = useMemo(() => getDropdownOptions(myData), []);
 
   // --- Event Handlers ---
@@ -115,14 +112,65 @@ const HomePage = () => {
     setView("form");
   };
 
-  // Columns for the results table
-  const columns = [
+  // STEP 2: Define the new columns array with our custom cell renderer
+  const columns = useMemo(
+    () => [
     { key: "Year", label: "Year" },
     { key: "Review Process", label: "Review Process" },
     { key: "Species Information", label: "Species Information" },
     { key: "Status", label: "Status" },
-    // Add other columns as needed
-  ];
+    {
+      key: "documents",
+      label: "Available Documents",
+      render: (row) => {
+        const links = [];
+        // Check for each report type and create a link if the URL exists
+        if (row["Assessment Summary"]) {
+          links.push(
+            <div key="summary">
+              <Link 
+                href={row["Assessment Summary"]} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Assessment Summary
+              </Link>
+            </div>
+          );
+        }
+        if (row["Assessment Report"]) {
+          links.push(
+            <div key="report">
+              <Link 
+                href={row["Assessment Report"]} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Assessment Report
+              </Link>
+            </div>
+          );
+        }
+        if (row["Panelist or Other Report"]) {
+            links.push(
+            <div key="panelist">
+              <Link 
+                href={row["Panelist or Other Report"]} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Panelist or Other Report
+              </Link>
+            </div>
+          );
+        }
+        // If we found any links, render them. Otherwise, show a message.
+        return links.length > 0 ? links : <span>None available</span>;
+      },
+    },
+  ],
+  []
+  );
 
   // --- The Rendered JSX ---
 
@@ -247,12 +295,7 @@ const HomePage = () => {
              </Button>
           </div>
           <br />
-          <Table
-            data={filteredData}
-            columns={columns}
-            bordered
-            striped
-          />
+          <Table data={filteredData} columns={columns} bordered striped/>
         </>
       )}
     </GridContainer>
